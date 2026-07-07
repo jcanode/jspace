@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>J-Space · Workspace Explorer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0e14'/%3E%3Ctext x='16' y='23' font-family='monospace' font-size='20' font-weight='bold' text-anchor='middle' fill='%23f0b429'%3EJ%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">J<span>·</span>Space</div>
+      <div class="tagline">Global&nbsp;Workspace / Jacobian-lens explorer</div>
+    </div>
+    <div class="backend-badge" id="backend-badge" title="Active analysis backend">
+      <span class="dot"></span><span id="backend-name">connecting…</span>
+    </div>
+  </header>
+
+  <section class="promptbar">
+    <div class="prompt-row">
+      <input id="prompt" type="text" spellcheck="false"
+             placeholder="Type a prompt, e.g. “The capital of France is”" />
+      <button id="analyze" class="primary">Analyze ▸</button>
+    </div>
+    <div class="examples" id="example-prompts"></div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="slice">🔬 Slice Viewer</button>
+    <button class="tab" data-view="explore">🧭 Explore</button>
+    <button class="tab" data-view="steer">🎚️ Steering</button>
+    <button class="tab" data-view="about">ⓘ About</button>
+  </nav>
+
+  <!-- ============ SLICE VIEWER ============ -->
+  <main class="view active" id="view-slice">
+    <div class="slice-grid">
+      <!-- LEFT: heatmap -->
+      <div class="panel heatmap-panel">
+        <div class="panel-head">
+          <h2>Workspace activity</h2>
+          <span class="hint">layer × token · click a cell</span>
+        </div>
+        <div id="heatmap-wrap" class="heatmap-wrap">
+          <div class="empty-note" id="heatmap-empty">Analyze a prompt to begin.</div>
+        </div>
+        <div class="legend" id="heatmap-legend"></div>
+        <div class="region-key">
+          <span><i class="chip sensory"></i>sensory (input echo)</span>
+          <span><i class="chip workspace"></i>workspace (concepts)</span>
+          <span><i class="chip motor"></i>motor (next token)</span>
+        </div>
+      </div>
+
+      <!-- MIDDLE: readouts across layers at selected position -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Layer readouts</h2>
+          <span class="hint" id="mid-sub">@ position —</span>
+        </div>
+        <div id="layer-readouts" class="readout-stack">
+          <div class="empty-note">Select a cell to see the vertical slice.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: readouts across positions + trajectory -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Position readouts</h2>
+          <span class="hint" id="right-sub">@ layer —</span>
+        </div>
+        <div id="traj-wrap" class="traj-wrap"></div>
+        <div id="pos-readouts" class="readout-stack">
+          <div class="empty-note">Select a cell to see the horizontal slice.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ EXPLORE ============ -->
+  <main class="view" id="view-explore">
+    <div class="explore-grid">
+      <div class="panel">
+        <div class="panel-head"><h2>Search the workspace</h2>
+          <span class="hint">concepts & activating contexts</span></div>
+        <div class="search-row">
+          <input id="search" type="text" spellcheck="false"
+                 placeholder="Search a concept, e.g. “paris”, “eight”, “emotion”…" />
+        </div>
+        <div class="feature-chips" id="feature-chips"></div>
+        <div id="search-results" class="search-results">
+          <div class="empty-note">Try a concept above, or click a feature chip.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Feature dashboard</h2>
+          <span class="hint" id="feat-sub">—</span></div>
+        <div id="feature-dash" class="feature-dash">
+          <div class="empty-note">Open a feature to see its top activations.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ STEERING ============ -->
+  <main class="view" id="view-steer">
+    <div class="panel steer-panel">
+      <div class="panel-head"><h2>Steer the workspace</h2>
+        <span class="hint">amplify a concept direction and watch the continuation shift</span></div>
+      <div class="steer-controls">
+        <label>Prompt
+          <input id="steer-prompt" type="text" spellcheck="false"
+                 placeholder="The capital of France is" /></label>
+        <label>Concept
+          <select id="steer-concept"></select></label>
+        <label>Strength <span id="steer-val" class="mono">0.60</span>
+          <input id="steer-strength" type="range" min="0" max="1" step="0.05" value="0.6" /></label>
+      </div>
+      <div class="steer-results" id="steer-results">
+        <div class="empty-note">Pick a concept and drag the strength slider.</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ ABOUT ============ -->
+  <main class="view" id="view-about">
+    <div class="panel about">
+      <h2>What am I looking at?</h2>
+      <p>This is an open-source, runs-anywhere mock of the <em>Global Workspace / Jacobian-lens</em>
+        interpretability interface. The <strong>Jacobian lens</strong> reads out which vocabulary
+        tokens a model is “poised to verbalise” at each layer and token position — a proxy for the
+        model's internal, reportable <em>workspace</em>.</p>
+      <ul>
+        <li><strong>Sensory layers</strong> (early) echo the input token and its sub-pieces.</li>
+        <li><strong>Workspace layers</strong> (middle) surface semantically related concepts —
+          this is where “verbalizable thought” lives, and where activity peaks.</li>
+        <li><strong>Motor layers</strong> (late) collapse onto the likely next token.</li>
+      </ul>
+      <p>The default <strong>mock backend</strong> is fully synthetic and needs no ML libraries, so
+        the UI runs anywhere. Start the server with <code>--model gpt2</code> (with
+        <code>torch</code> + <code>transformers</code> installed) to drive the same views with a
+        real open-source model via a logit-lens approximation of the J-lens.</p>
+      <p class="muted">Inspired by <a href="https://transformer-circuits.pub/2026/workspace/index.html" target="_blank" rel="noopener">Transformer Circuits: Verbalizable Representations &amp; the Global Workspace</a>
+        and <a href="https://www.neuronpedia.org/" target="_blank" rel="noopener">Neuronpedia</a>.
+        Readouts here are illustrative, not real model internals.</p>
+    </div>
+  </main>
+
+  <footer class="foot">J-Space · mock interpretability explorer · <span id="foot-backend"></span></footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
