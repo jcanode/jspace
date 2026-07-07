@@ -2,8 +2,8 @@
 
 A backend turns a prompt into a *slice* analysis: for every (layer, position)
 pair it reports the workspace activity and a ranked "readout" of the vocabulary
-tokens the model is poised to verbalise there. Both the mock and the (optional)
-real transformers backend implement this shape so the frontend is agnostic.
+tokens the model is poised to verbalise there. Both offline backends (synthetic
+``mock`` and learned ``corpus``) implement this shape so the frontend is agnostic.
 """
 
 from __future__ import annotations

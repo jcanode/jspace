@@ -1,4 +1,0 @@
-# Optional: only needed to drive a REAL open-source model with `--model <id>`.
-# The default mock backend needs none of this and runs on the Python stdlib.
-torch>=2.0
-transformers>=4.30

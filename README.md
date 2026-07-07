@@ -3,9 +3,9 @@
 A **mock, open-source interpretability explorer** for the *Global Workspace / Jacobian-lens*
 view of language models. It recreates the exploration experience of the
 [Transformer Circuits "Verbalizable Representations & the Global Workspace"](https://transformer-circuits.pub/2026/workspace/index.html)
-slice viewer and [Neuronpedia](https://www.neuronpedia.org/)'s feature dashboards — but runs
-**anywhere with zero dependencies** (pure Python standard library), and optionally drives a
-**real open-source model** (e.g. GPT-2) when `torch` + `transformers` are installed.
+slice viewer and [Neuronpedia](https://www.neuronpedia.org/)'s feature dashboards. It runs
+**fully offline with zero dependencies** — pure Python standard library, no downloads, no
+`torch`, no `transformers`, no HuggingFace access.
 
 > ⚠️ The default backend is **synthetic**. Readouts are illustrative of the *structure* of a
 > global workspace, not real model internals. It's a teaching / prototyping tool.
@@ -38,7 +38,7 @@ verbalise" at each layer and token position — a proxy for its internal, report
 ## Run it
 
 ```bash
-# zero dependencies — pure Python stdlib
+# nothing to install — pure Python standard library, works offline
 python3 server.py
 # open http://localhost:8000
 ```
@@ -47,24 +47,22 @@ Options:
 
 ```bash
 python3 server.py --port 9000          # choose a port
-python3 server.py --layers 24          # deeper mock model
-python3 server.py --model gpt2         # drive a real open-source model (see below)
+python3 server.py --layers 24          # simulate a deeper model
+python3 server.py --model corpus       # learned n-gram backend (see below)
 ```
 
-### Using a real open-source model
+## Two offline backends
 
-Install the optional extras and point `--model` at any HuggingFace causal-LM id:
+Both are pure stdlib and run with no network access — pick with `--model`:
 
-```bash
-pip install -r requirements-optional.txt   # torch + transformers
-python3 server.py --model gpt2             # or distilgpt2, EleutherAI/pythia-160m, ...
-```
+| `--model` | What it is |
+|---|---|
+| `mock` *(default)* | **Synthetic.** Readouts come from a hand-curated concept graph — always meaningful, zero setup. |
+| `corpus` | **Learned.** A tiny **n-gram language model trained at startup** from a bundled text corpus. Workspace readouts are the tokens most distributionally related to each token (ranked by pointwise mutual information); motor readouts are the model's learned next-token distribution. Real statistics, computed from data — no downloads. |
 
-The real backend implements the J-lens as a **logit-lens approximation**: it projects the
-residual stream at each layer through the model's final layer-norm + unembedding to read out
-the top tokens per (layer, position), and uses readout confidence (negative entropy) as the
-workspace-activity signal. If `torch`/`transformers` aren't present, the server prints a note
-and falls back to the mock backend automatically.
+> ⚠️ Both backends are small and illustrative — they demonstrate the *structure* of a global
+> workspace (sensory → workspace → motor), not the internals of a frontier model. It's a
+> teaching / prototyping tool.
 
 ## Layout
 
@@ -72,9 +70,9 @@ and falls back to the mock backend automatically.
 server.py                 # zero-dependency stdlib HTTP server + JSON API
 jlens/
   base.py                 # Backend interface + Analysis/Readout data shapes
-  mock.py                 # deterministic synthetic J-lens (default)
-  hf.py                   # optional real-model backend (logit-lens)
-  knowledge.py            # concept association graph + tokenizer utils
+  mock.py                 # deterministic synthetic J-lens (default backend)
+  corpus.py               # tiny n-gram model learned from the bundled corpus
+  knowledge.py            # concept graph, corpus, tokenizer utils
 frontend/
   index.html  style.css  app.js    # self-contained vanilla-JS UI (no build step)
 ```

@@ -122,6 +122,29 @@ CORPUS = [
     "The red apple fell from the tree onto the green grass.",
     "Coffee gives a warm jolt of caffeine every single morning.",
     "Rome, the capital of Italy, is famous for pizza and pasta.",
+    "Paris is the capital of France and sits beside the river Seine.",
+    "The capital of Japan is Tokyo, a huge city in Asia.",
+    "The capital of Germany is Berlin, a city in central Europe.",
+    "The capital of Egypt is Cairo, near the great pyramids and the Nile.",
+    "An insect has six legs, but a spider has eight legs instead.",
+    "The cat chased the bird across the green garden fence.",
+    "The elephant is a very large gray animal with a long trunk.",
+    "A bird can fly through the sky using its two feathered wings.",
+    "The fish swam quietly through the cold blue ocean water.",
+    "The sun is a bright hot star at the center of the solar system.",
+    "The moon is a gray world that orbits the Earth every month.",
+    "An atom has a dense nucleus of protons circled by tiny electrons.",
+    "Two plus three equals five, a simple sum in basic math.",
+    "In Python you define a function with def and it can return a value.",
+    "A variable stores a value that the program can read and change.",
+    "She smiled with joy and felt her happy heart lift with hope.",
+    "He felt a cold wave of fear as a dark shadow crossed the wall.",
+    "The baker mixed flour and water to bake a warm loaf of bread.",
+    "Red is the color of fire and blood, while blue is the color of sky.",
+    "The green leaf turned red and gold in the cool autumn air.",
+    "Water is a clear liquid made of hydrogen and oxygen atoms.",
+    "The loyal dog wagged its tail and barked at the happy child.",
+    "A neural model learns weights from data to predict each next word.",
 ]
 
 # Common English filler tokens for early/late layers when nothing better fits.
@@ -140,15 +163,16 @@ def tokenize(text: str) -> List[str]:
     return toks if toks else ["<empty>"]
 
 
-def normalize(token: str) -> str:
+def normalize(token: str, singularize: bool = True) -> str:
     t = token.lower().strip("'\".,!?;:()[]")
-    # naive singularisation so "spiders" hits "spider"
-    if t.endswith("ies") and len(t) > 4:
-        t = t[:-3] + "y"
-    elif t.endswith("es") and len(t) > 4:
-        t = t[:-2]
-    elif t.endswith("s") and len(t) > 3:
-        t = t[:-1]
+    if singularize:
+        # naive singularisation so "spiders" hits the "spider" concept key
+        if t.endswith("ies") and len(t) > 4:
+            t = t[:-3] + "y"
+        elif t.endswith("es") and len(t) > 4:
+            t = t[:-2]
+        elif t.endswith("s") and len(t) > 3:
+            t = t[:-1]
     return t
 
 

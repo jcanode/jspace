@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""J-Space Workspace Explorer — zero-dependency server.
+"""J-Space Workspace Explorer — zero-dependency, fully-offline server.
 
 Serves the static frontend and a small JSON API backed by the J-lens engine.
-Runs on the Python standard library alone (mock backend). Pass ``--model`` with
-a HuggingFace id (e.g. ``gpt2``) to analyse a real open-source model when
-``torch``/``transformers`` are installed.
+Runs on the Python standard library alone — no downloads, no `torch`, no
+`transformers`, no network access required.
 
-    python3 server.py                # mock backend, http://localhost:8000
-    python3 server.py --model gpt2   # real GPT-2 (needs torch+transformers)
+    python3 server.py                  # synthetic mock backend, :8000
+    python3 server.py --model corpus   # tiny n-gram model learned from the
+                                       # bundled corpus (still offline/stdlib)
     python3 server.py --port 9000
 """
 
@@ -135,18 +135,15 @@ EXAMPLE_FEATURES = ["france", "spider", "happy", "python", "moon", "capital"]
 def main():
     global BACKEND
     ap = argparse.ArgumentParser(description="J-Space Workspace Explorer server")
-    ap.add_argument("--model", default="mock",
-                    help="'mock' (default) or a HuggingFace model id like 'gpt2'")
+    ap.add_argument("--model", default="mock", choices=["mock", "corpus"],
+                    help="'mock' (synthetic, default) or 'corpus' (offline n-gram)")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--layers", type=int, default=16,
-                    help="layer count for the mock backend")
+                    help="number of transformer layers to simulate")
     args = ap.parse_args()
 
-    if args.model == "mock":
-        BACKEND = get_backend("mock", n_layers=args.layers)
-    else:
-        BACKEND = get_backend(args.model)
+    BACKEND = get_backend(args.model, n_layers=args.layers)
 
     httpd = ThreadingHTTPServer((args.host, args.port), Handler)
     print(f"[jspace] backend = {BACKEND.display_name} ({BACKEND.n_layers} layers)")

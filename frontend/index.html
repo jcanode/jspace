@@ -138,10 +138,12 @@
           this is where “verbalizable thought” lives, and where activity peaks.</li>
         <li><strong>Motor layers</strong> (late) collapse onto the likely next token.</li>
       </ul>
-      <p>The default <strong>mock backend</strong> is fully synthetic and needs no ML libraries, so
-        the UI runs anywhere. Start the server with <code>--model gpt2</code> (with
-        <code>torch</code> + <code>transformers</code> installed) to drive the same views with a
-        real open-source model via a logit-lens approximation of the J-lens.</p>
+      <p>Everything runs <strong>fully offline on the Python standard library</strong> — no
+        downloads, no <code>torch</code>, no <code>transformers</code>, no HuggingFace access.
+        The default <strong>mock</strong> backend is synthetic. Start the server with
+        <code>--model corpus</code> to instead drive the same views with a tiny
+        <strong>n-gram language model learned at startup</strong> from a bundled text corpus —
+        still pure stdlib, still offline, but with readouts computed from real data.</p>
       <p class="muted">Inspired by <a href="https://transformer-circuits.pub/2026/workspace/index.html" target="_blank" rel="noopener">Transformer Circuits: Verbalizable Representations &amp; the Global Workspace</a>
         and <a href="https://www.neuronpedia.org/" target="_blank" rel="noopener">Neuronpedia</a>.
         Readouts here are illustrative, not real model internals.</p>
